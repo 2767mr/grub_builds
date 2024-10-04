@@ -1,5 +1,8 @@
 name: Build grub from source
 
+permissions:
+  contents: write
+  
 on:
   release:
     types: [published]
