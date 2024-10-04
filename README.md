@@ -1,4 +1,4 @@
-# Grub build
+# Grub builds
 
 [View builds](https://github.com/2767mr/grub_builds/releases)
 
