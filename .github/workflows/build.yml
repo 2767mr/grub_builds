@@ -20,7 +20,7 @@ jobs:
       uses: booxmedialtd/ws-action-parse-semver@v1
       with:
         input_string: ${{ github.ref }}
-        version_extractor_regex: '\/(.*)$'
+        version_extractor_regex: '\/v(.*)$'
         
     - name: Install packages
       run: |
