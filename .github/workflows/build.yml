@@ -19,24 +19,26 @@ jobs:
         sudo apt-get clean
         
     - name: Fetch sources
-      uses: actions/checkout@v4
-      with:
-        repository: https://git.savannah.gnu.org/git/grub.git
-        ref: grub-2.12
+      run: git clone https://git.savannah.gnu.org/git/grub.git --branch grub-2.12 --depth 1
 
     - name: Bootstrap
+      working-directory: ./grub
       run: ./bootstrap
 
     - name: Configure
+      working-directory: ./grub
       run: ./configure --prefix="$HOME/opt/grub" --target=x86_64 --with-platform=efi
 
     - name: Install
+      working-directory: ./grub
       run: make install
 
     - name: Build image
+      working-directory: ./grub
       run: $HOME/opt/grub/bin/grub-mkrescue -o grub.iso
 
     - name: Upload image
+      working-directory: ./grub
       uses: softprops/action-gh-release@v2
       with:
         files: grub.iso
