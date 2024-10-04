@@ -1,0 +1,42 @@
+name: Build grub from source
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: true
+
+    steps:
+    - name: Install packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git build-essential cdbs devscripts equivs fakeroot flex bison help2man texinfo xfonts-unifont libfreetype6-dev libdevmapper-dev libsdl1.2-dev xorriso parted libfuse-dev fonts-dejavu-core liblzma-dev dosfstools mtools wamerican pkg-config bash-completion libefiboot-dev libefivar-dev python3 gcc gawk xorriso
+        sudo apt-get clean
+        
+    - name: Fetch sources
+      uses: actions/checkout@v4
+      with:
+        repository: https://git.savannah.gnu.org/git/grub.git
+        ref: grub-2.12
+
+    - name: Bootstrap
+      run: ./bootstrap
+
+    - name: Configure
+      run: ./configure --prefix="$HOME/opt/grub" --target=x86_64 --with-platform=efi
+
+    - name: Install
+      run: make install
+
+    - name: Build image
+      run: $HOME/opt/grub/bin/grub-mkrescue -o grub.iso
+
+    - name: Upload image
+      uses: softprops/action-gh-release@v2
+      with:
+        files: grub.iso
