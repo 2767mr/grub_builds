@@ -15,13 +15,6 @@ jobs:
       fail-fast: true
 
     steps:
-    - name: Parse tag
-      id: semver_parser 
-      uses: booxmedialtd/ws-action-parse-semver@v1
-      with:
-        input_string: ${{ github.ref }}
-        version_extractor_regex: '\/v(.*)$'
-        
     - name: Install packages
       run: |
         sudo apt-get update
@@ -29,7 +22,7 @@ jobs:
         sudo apt-get clean
         
     - name: Fetch sources
-      run: git clone https://git.savannah.gnu.org/git/grub.git --branch grub-${{ steps.semver_parser.outputs.major }}.${{ steps.semver_parser.outputs.minor }} --depth 1
+      run: git clone https://git.savannah.gnu.org/git/grub.git --branch ${{ github.ref_name }} --depth 1
 
     - name: Bootstrap
       working-directory: ./grub
