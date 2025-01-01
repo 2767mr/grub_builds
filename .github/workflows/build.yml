@@ -8,11 +8,13 @@ on:
     types: [published]
 
 jobs:
-  build-bios:
+  build:
     runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: true
+      matrix:
+        platform: ["pc", "efi"]
 
     steps:
     - name: Install packages
@@ -30,7 +32,7 @@ jobs:
 
     - name: Configure
       working-directory: ./grub
-      run: ./configure --prefix="$HOME/opt/grub" --target=x86_64 --with-platform=pc
+      run: ./configure --prefix="$HOME/opt/grub" --target=x86_64 --with-platform=${{ matrix.platform }}
 
     - name: Install
       working-directory: ./grub
@@ -38,45 +40,9 @@ jobs:
 
     - name: Build image
       working-directory: ./grub
-      run: $HOME/opt/grub/bin/grub-mkrescue "$HOME/opt/grub/lib/grub/i386-pc" -o grub-bios.iso
+      run: $HOME/opt/grub/bin/grub-mkrescue -o grub-${{ matrix.platform }}.iso
 
     - name: Upload image
       uses: softprops/action-gh-release@v2
       with:
-        files: grub/grub-bios.iso
-  build-efi:
-    runs-on: ubuntu-24.04
-
-    strategy:
-      fail-fast: true
-
-    steps:
-    - name: Install packages
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git build-essential cdbs devscripts equivs fakeroot flex bison help2man texinfo xfonts-unifont libfreetype6-dev libdevmapper-dev libsdl1.2-dev xorriso parted libfuse-dev fonts-dejavu-core liblzma-dev dosfstools mtools wamerican pkg-config bash-completion libefiboot-dev libefivar-dev python3 gcc gawk xorriso
-        sudo apt-get clean
-        
-    - name: Fetch sources
-      run: git clone https://git.savannah.gnu.org/git/grub.git --branch ${{ github.ref_name }} --depth 1
-
-    - name: Bootstrap
-      working-directory: ./grub
-      run: ./bootstrap
-
-    - name: Configure
-      working-directory: ./grub
-      run: ./configure --prefix="$HOME/opt/grub" --target=x86_64 --with-platform=efi
-
-    - name: Install
-      working-directory: ./grub
-      run: make install
-
-    - name: Build image
-      working-directory: ./grub
-      run: $HOME/opt/grub/bin/grub-mkrescue -o grub-efi.iso
-
-    - name: Upload image
-      uses: softprops/action-gh-release@v2
-      with:
-        files: grub/grub-efi.iso
+        files: grub/grub-${{ matrix.platform }}.iso
